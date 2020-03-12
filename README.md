@@ -52,3 +52,5 @@ document.getElementById('edit-form').onclick = function() {
   toggleEdit(true);
 };
 </script>
+
+https://github.com/bezael/sistema-login-php-mysql-jquery
