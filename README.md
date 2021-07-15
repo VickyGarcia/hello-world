@@ -3924,3 +3924,124 @@ $ http $host:8000/headers Host:$host apikey:k#F1Bpz3
 Eliminar llave de autenticación
 $ http DELETE $host:8001/consumers/prueba/key-auth/k#F1Bpz3
 
+        
+        
+        
+        
+        
+        
+        
+        ---------------------------------------------------------------------------
+        UBUNTU 18.4 DOCKER
+
+Primero, agrega la clave GPG, ingresando el siguiente comando en la línea de comando:
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+
+A continuación, agrega el repositorio:
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+
+sudo apt update
+
+apt-cache policy docker-ce
+
+
+
+
+
+
+Una salida correcta se verá como la siguiente con diferentes números de versión:
+docker-ce:
+   Installed: (none)
+   Candidate: 16.04.1~ce~4-0~ubuntu
+   Version table:
+       16.04.1~ce~4-0~ubuntu 500
+            500 https://download.docker.com/linux/ubuntubionic/stableamd64packages
+
+5. Instala Docker en Ubuntu 18.04
+sudo apt install docker-ce
+
+
+6. Comprueba el estado de Docker
+Una vez que se completa la instalación, es buena idea verificar el estado del servicio:
+
+sudo systemctl status docker
+
+
+Cómo comenzar a usar Docker en Ubuntu 18.04
+
+Instalar Kong
+$ docker run -d --name kong-database \
+              -p 5435:5435 \
+              -e POSTGRES_USER=kong \
+              -e POSTGRES_DB=kong \
+              -e POSTGRES_PASSWORD=mQjQqwkcJWpfNrmC \
+              postgres:9.4
+
+$ docker run -d --name kong \
+              --link kong-database:kong-database \
+              -e KONG_DATABASE=postgres \
+              -e KONG_PG_HOST=kong-database \
+              -e KONG_PG_USER=kong \
+              -e KONG_PG_PASSWORD=mQjQqwkcJWpfNrmC \
+              -p 8000:8000 \
+              -p 8443:8443 \
+              -p 8001:8001 \
+              -p 7946:7946 \
+              -p 7946:7946/udp \
+              kong:0.10.1
+Configurar Httpie
+$ host=192.168.90.2
+$ alias http='docker run -it --rm mcampbell/httpie'
+
+
+Probar servicio
+
+$ http $host:8000
+Registrar un API
+$ http POST $host:8001/apis name=tdcamexonline hosts=192.168.90.2:6666 upstream_url=/mts-rest/leads_send
+
+
+Probar redireccionamiento
+
+$ http $host:8000/headers Host:$host
+Activar plugin Key-Auth
+$ http POST $host:8001/apis/tdcamexonline_api/plugins name=key-auth
+$ http $host:8000/headers Host:tdcamexonline
+Crear usuario Prueba
+$ http POST $host:8001/consumers username=prueba_api custom_id=prueba_api@impulse-telecom.com
+
+
+Asignar credenciales
+
+$ http POST $host:8001/consumers/prueba_api/key-auth key=OcbDuMmdx1
+
+Probar autenticación
+$ http $host:8000/headers Host:$host apikey:OcbDuMmdx1
+
+
+Eliminar llave de autenticación
+$ http DELETE $host:8001/consumers/prueba/key-auth/OcbDuMmdx1
+
+
+curl -i -X POST  --url http://localhost:8001/apis/ \
+ --data 'name=tdcamexonline' \
+ --data 'upstream_url=http://localhost:6666' \
+--data 'request_path=/send_leads'
+http POST $host:8001/apis name=tdcamexonline hosts=$host upstream_url=http://localhost:6666/lts-rest/send_lead
+
+http $host:8001/apis apikey:OcbDuMmdx1
+
+
+
+
+ curl -i -X POST  --url http://192.168.90.2:8000/apis/ --data 'name=amex'  --data 'upstream_url=http://192.168.90.2:6666' --data 'request_path=/mts-rest/send_lead'
+
+
+172.20.1.161:6666/mts-rest/send_lead
+
+
+curl -i -X POST --url http://192.168.90.2:8000 --header "Host:tdcamexonline" --header "apikey: OcbDuMmdx1"
+curl -i -X POST --url http://localhost:8001/apis/ --data 'name=tdcamexonline' --data 'hosts=' --data 'upstream_url=http://mockbin.com/'
