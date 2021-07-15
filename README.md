@@ -3755,3 +3755,172 @@ $ http $host:8000/headers Host:$host apikey:OcbDuMmdx3
 
 Eliminar llave de autenticación
 $ http DELETE $host:8001/consumers/api_p/key-auth/OcbDuMmdx3
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ----------------------------------------------------------------------------------
+        Instalacion Docker y Kong en Fedora
+
+Instalar Docker
+
+*Si está instalado y desea desinstalarlo junto con las dependencias asociadas
+
+$ sudo dnf remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine
+Instalar con script de conveniencia
+
+$ curl -fsSL https://get.docker.com -o get-docker.sh
+$ sudo sh get-docker.sh
+Usar Docker como usuario no root
+ $ sudo usermod -aG docker <your-user>
+Actualice Docker
+$ su -c 'yum update'
+
+INICIAR DOCKER
+
+systemctl start docker
+
+
+*Nota:
+
+Borrar un contenedor especifico
+
+$ docker rm <container_id>
+
+
+
+Borrar una imagen especifica
+
+$ docker rmi <image_id>
+
+Cuando un contenedor tiene algún error no inicia y se muestra con status Exited, se revisa que problema presenta con:
+
+$ docker logs -f <container_id>
+Instalar Kong
+$ docker run -d --name kong-database \
+              -p 5435:5435 \
+              -e POSTGRES_USER=amex \
+              -e POSTGRES_DB=amex \
+              -e POSTGRES_PASSWORD=4m3x48rteoKL \
+              postgres:9.4
+
+
+
+docker run -d --name kong-database \
+--network=kong-net \
+-p 5555:5432 \
+-e "POSTGRES_USER=amex" \
+-e "POSTGRES_DB=amex" \
+-e "POSTGRES_PASSWORD=4m3x48rteoKL" \
+postgres:12.2
+Prepare your database
+
+
+docker run --rm \
+--network=kong-net \
+-e "KONG_DATABASE=postgres" \
+-e "KONG_PG_HOST=127.0.0.1" \
+-e "KONG_PG_PASSWORD=4m3x48rteoKL" \
+kong:2.0.3 kong migrations bootstrap
+
+docker run --rm \
+    --link kong-database:kong-database \
+    -e "KONG_DATABASE=postgres" \
+    -e "KONG_PG_HOST=kong-database" \
+    kong:1.0.3-alpine kong migrations bootstrap
+
+
+
+
+
+
+
+*Nota:
+Mostrar todos los contenedores
+
+$ docker ps -a
+
+
+Mostrar todas las imágenes
+
+$ docker images -a 
+
+
+Parar o eliminar todos los contenedores docker:
+Para pararlos puede usarse:
+
+docker stop $(docker ps -a -q)
+Y para eliminarlos:
+
+docker rm $(docker ps -a -q)
+
+
+$ docker run -d --name kong \
+              --link kong-database:kong-database \
+              -e KONG_DATABASE=postgres \
+              -e KONG_PG_HOST=kong-database \
+              -e KONG_PG_USER=amex \
+              -e KONG_PG_PASSWORD=4m3x48rteoKL \
+              -p 8000:8000 \
+              -p 8443:8443 \
+              -p 8001:8001 \
+              -p 7946:7946 \
+              -p 7946:7946/udp \
+              kong:0.10.1
+Configurar Httpie
+$ host=<tu-hostname-externo>
+$ alias http='docker run -it --rm mcampbell/httpie'
+
+
+Probar servicio
+
+$ http $host:8000
+Registrar un API
+$ http POST $host:8001/apis name=<you-name-proyect> hosts=$host upstream_url=http://httpbin.org
+
+
+Probar redireccionamiento
+
+$ http $host:8000/headers Host:$host
+Activar plugin Key-Auth
+$ http POST $host:8001/apis/<you-name-proyect>/plugins name=key-auth
+$ http $host:8000/headers Host:$host
+Crear usuario Prueba
+$ http POST $host:8001/consumers username=prueba custom_id=prueba@impulse-telecom.com
+
+
+Asignar credenciales
+
+$ http POST $host:8001/consumers/prueba/key-auth key=k#F1Bpz3
+
+Probar autenticación
+$ http $host:8000/headers Host:$host apikey:k#F1Bpz3
+
+
+Eliminar llave de autenticación
+$ http DELETE $host:8001/consumers/prueba/key-auth/k#F1Bpz3
+
