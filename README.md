@@ -3619,3 +3619,139 @@ tsconfig.json
     "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Instalacion Docker y Kong
+
+Instalar Docker
+
+*Si está instalado y desea desinstalarlo junto con las dependencias asociadas
+
+$ sudo dnf remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine
+Instalar con script de conveniencia
+
+$ curl -fsSL https://get.docker.com -o get-docker.sh
+$ sudo sh get-docker.sh
+Usar Docker como usuario no root
+ $ sudo usermod -aG docker <your-user>
+Actualice Docker
+$ su get update
+
+Activar el servicio Docker
+
+sudo systemctl start docker
+
+Detener el servicio Docker
+
+sudo systemctl stop docker
+
+Reiniciar el servicio Docker
+
+sudo systemctl restart docker
+
+Mostrar el status del servicio Docker
+
+sudo systemctl status docker
+
+*Nota:
+Mostrar todos los contenedores
+
+$ docker ps -a
+
+
+Borrar un contenedor especifico
+
+$ docker rm <container_id>
+
+Mostrar todas las imágenes
+
+$ docker images -a 
+
+Borrar una imagen especifica
+
+$ docker rmi <image_id>
+
+Levantar el servicio de un contenedor especifico
+
+$ docker start <container_id>
+
+Detener el servicio de un contenedor especifico
+
+$ docker stop <container_id>
+
+Cuando un contenedor tiene algún error no inicia y se muestra con status Exited, se revisa que problema presenta con:
+
+$ docker logs -f <container_id>
+Instalar Kong
+$ docker run -d --name kong-database \
+              -p 5435:5435 \
+              -e POSTGRES_USER=kong \
+              -e POSTGRES_DB=kong \
+              -e POSTGRES_PASSWORD=mQjQqwkcJWpfNrmC \
+              postgres:9.4
+
+$ docker run -d --name kong \
+              --link kong-database:kong-database \
+              -e KONG_DATABASE=postgres \
+              -e KONG_PG_HOST=kong-database \
+              -e KONG_PG_USER=kong \
+              -e KONG_PG_PASSWORD=mQjQqwkcJWpfNrmC \
+              -p 8000:8000 \
+              -p 8443:8443 \
+              -p 8001:8001 \
+              -p 7946:7946 \
+              -p 7946:7946/udp \
+              kong:0.10.1
+Configurar Httpie
+$ host=192.168.90.2 ##(Establecer en la variable host la direccion ip que va a utilizar el servidor)
+$ alias http='docker run -it --rm mcampbell/httpie' ##(crear un alias http y asignar el uso de la imagen mcampbell/httpie a dicha variable)
+
+
+Probar servicio
+
+$ http $host:8000 ##(Probar servicio con el alias http la variable del servidor y el puerto que está escuchando)
+Registrar un API
+$ http POST $host:8001/apis name=tdcamexonline hosts=$host upstream_url=http://192.168.90.2:6666/lts-rest/send_lead ##(Registrar el api con un redireccionamiento)
+
+
+Probar redireccionamiento
+
+$ http $host:8000/headers Host:$host
+Activar plugin Key-Auth
+$ http POST $host:8001/apis/tdcamexonline/plugins name=key-auth
+$ http $host:8000/headers Host:$host
+Crear usuario Prueba
+$ http POST $host:8001/consumers username=api_p custom_id=api_p@impulse-telecom.com
+
+
+Asignar credenciales
+
+$ http POST $host:8001/consumers/api_p/key-auth key=OcbDuMmdx3
+
+Probar autenticación
+$ http $host:8000/headers Host:$host apikey:OcbDuMmdx3
+
+
+Eliminar llave de autenticación
+$ http DELETE $host:8001/consumers/api_p/key-auth/OcbDuMmdx3
