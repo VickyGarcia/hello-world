@@ -1,0 +1,13 @@
+
+CREATE OR REPLACE FUNCTION sps_precargapredictivoprueba3()
+returns table ("id" integer, "prioridad" integer)
+as
+$func$
+
+insert into precargapredictivo (id,prioridad,fecha_carga,estatus) values (4,5,'2021-07-07 00:00:00',2);
+update precargapredictivo set estatus = 3 where estatus = 2 
+returning id, prioridad;
+$func$
+  LANGUAGE sql 
+
+  select id, prioridad from sps_precargapredictivoprueba3();
