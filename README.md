@@ -352,3 +352,31 @@ class MaxcomSms {
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------
+curl -X POST \
+  https://189.202.227.124/brdcstr-endpoint-web/services/messaging/ \
+  -H 'Authorization: 17zTjV6YiTej1t4CbvVulgN0pIU=' \
+  -H 'Content-Type: application/json' \
+  -H 'Postman-Token: 44d75b0e-0ec2-408e-aef0-29fd123dfb14' \
+  -H 'cache-control: no-cache' \
+  -d '{"apiKey":7278,"country":"MX","dial":26262,"message":"Mensaje de prueba","msisdns":[529717185016],"tag":"bancomerseg"}'
